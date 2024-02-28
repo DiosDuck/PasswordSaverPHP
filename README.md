@@ -1,4 +1,4 @@
-#Password saver done in PHP
+# Password saver done in PHP
 
 > **_NOTE:_** This project was created in PHP8.1
 
@@ -8,15 +8,15 @@ It's a console app which saves accounts. If this app is shared with another pers
 
 The app is very basic in this current state, having basic properties for both the users and the accounts they want to use.
 
-##Requirements
+## Requirements
 
 Except for PHP 8.1, we require `openssl` extension for encryption (else we suggest to use the not encrypted variations) and `pdo_sqlite` for using the database (else we suggest to use the in memory or file variations)
 
-##Instalation
+## Instalation
 
 Download the code from GitHub and you should be able to use it by executing the `main.php` file from the directory.
 
-##Usage and customization
+## Usage and customization
 
 In `main.php` file there are 3 big classes: UI, Service and Repository.
 
