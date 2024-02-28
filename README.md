@@ -2,7 +2,7 @@
 
 > **_NOTE:_** This project was created in PHP8.1
 
-##What does it do?
+## What does it do?
 
 It's a console app which saves accounts. If this app is shared with another person, they can use it too freely without accessing your personal account.
 
