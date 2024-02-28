@@ -12,7 +12,7 @@ trait TimeoutCheckTrait {
 		if (!$user  instanceof TimeoutUser) {
 			throw new WrongUserException();
 		}
-		if (time() - $user->getTime() > 60) {
+		if (time() - $user->getTime() > 60 * 5) {
 			throw new TimeoutException();
 		}
 
