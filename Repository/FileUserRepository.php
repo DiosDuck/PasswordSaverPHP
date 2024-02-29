@@ -2,54 +2,46 @@
 
 namespace Repository;
 
-use Builder\IBuilder\IUserBuilder;
-use Builder\UserBuilder;
-use Entity\User;
+use Entity\IEntity\IUser;
+use Mapper\IMapper\IUserFileMapper;
 use Repository\UserRepository;
 
 class FileUserRepository extends UserRepository {
 	private string $file;
-	private UserBuilder $userBuilder = new UserBuilder();
+	private IUserFileMapper $UserFileMapper;
 	
-	public function __construct(string $file) {
+	public function __construct(string $file, IUserFileMapper $UserFileMapper) {
 		parent::__construct();
 		$this->file = $file;
+		$this->UserFileMapper = $UserFileMapper;
 		$this->readFromFile();
 	}
 	
-	public function add(User $newUser) : User {
+	public function add(IUser $newUser) : IUser {
 		$user = parent::add($newUser);
 		$this->writeToFile();
 		return $user;
 	}
 	
-	public function update(User $oldUser, User $newUser) : User {
+	public function update(IUser $oldUser, IUser $newUser) : IUser {
 		$user = parent::update($oldUser, $newUser);
 		$this->writeToFile();
 		return $user;
 	}
 	
-	public function delete(string $username, string $password) : User {
+	public function delete(string $username, string $password) : IUser {
 		$user = parent::delete($username, $password);
 		$this->writeToFile();
 		return $user;
-	}
-
-	public function getBuilder() : IUserBuilder {
-		return $this->userBuilder;
 	}
 	
 	private function readFromFile() {
 		if (file_exists($this->file)) {
 			$streamFile = fopen($this->file, 'r');
 			while(!feof($streamFile)) {
-				$line = explode(';', str_replace("\n", "", fgets($streamFile)));
-				
-				$this->userBuilder->createUser();
-				$this->userBuilder->setName($line[0]);
-				$this->userBuilder->setUsername($line[1]);
-				$this->userBuilder->setPassword($line[2]);
-				$user = $this->userBuilder->getUser();
+				$line = str_replace("\n", "", fgets($streamFile));
+
+				$user = $this->UserFileMapper->getUser($line);
 				
 				$this->users[] = $user;
 			}
@@ -60,7 +52,7 @@ class FileUserRepository extends UserRepository {
 	private function writeToFile() {
 		$lines = [];
 		foreach ($this->users as $user) {
-			$lines[] = $user->getName() . ';' . $user->getUsername() . ';' .$user->getPassword();
+			$lines[] = $this->UserFileMapper->getLine($user);
 		}
 		$output = implode("\n", $lines);
 		$streamFile = fopen($this->file, 'w');

@@ -2,7 +2,9 @@
 
 namespace Entity;
 
-class User {
+use Entity\IEntity\IUser;
+
+class User implements IUser {
 	private string $username;
 	private string $password;
 	private string $name;

@@ -2,26 +2,27 @@
 
 namespace Service;
 
+use Builder\IBuilder\IUserBuilder;
 use Service\UserService;
 use Utility\TimeoutCheckTrait;
-use Entity\User;
+use Entity\IEntity\IUser;
 use Entity\TimeoutUser;
 use Repository\IRepository\IUserRepository;
 
 class TimeoutUserService extends UserService {
 	use TimeoutCheckTrait;
 	
-	public function __construct(IUserRepository $userRepository) {
-		parent::__construct($userRepository);
+	public function __construct(IUserRepository $userRepository, IUserBuilder $userBuilder) {
+		parent::__construct($userRepository, $userBuilder);
 	}
 	
-	public function logIn(string $username, string $password) : User {
+	public function logIn(string $username, string $password) : IUser {
 		$user = parent::logIn($username, $password);
 		$timeoutUser = new TimeoutUser($user);
 		return $timeoutUser;
 	}
 	
-	public function changePassword(User $user, string $oldPassword, string $newPassword) : User {
+	public function changePassword(IUser $user, string $oldPassword, string $newPassword) : IUser {
 		$timeoutUser = $this->checkUserValid($user);
 		$user = parent::changePassword($timeoutUser->getUser(), $oldPassword, $newPassword);
 		
@@ -30,7 +31,7 @@ class TimeoutUserService extends UserService {
 		return $timeoutUser;
 	}
 	
-	public function changeName(User $user, string $password, string $newName) : User {
+	public function changeName(IUser $user, string $password, string $newName) : IUser {
 		$timeoutUser = $this->checkUserValid($user);
 		$user = parent::changeName($timeoutUser->getUser(), $password, $newName);
 		
@@ -39,7 +40,7 @@ class TimeoutUserService extends UserService {
 		return $timeoutUser;
 	}
 	
-	public function deleteUser(User $user, string $password) : void {
+	public function deleteUser(IUser $user, string $password) : void {
 		$timeoutUser = $this->checkUserValid($user);
 		parent::deleteUser($timeoutUser->getUser(), $password);
 	}

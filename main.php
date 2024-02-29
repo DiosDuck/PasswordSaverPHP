@@ -8,6 +8,23 @@ ini_set('log_errors', TRUE);
 ini_set("error_log", __DIR__ . "/error.log");
 
 try {
+	/*
+	#create folders/files
+	#comment if not needed
+	$fileDir = __DIR__ . '/users/';
+	if (!file_exists($fileDir)) {
+		mkdir($fileDir);
+	}
+	$userFile = $fileDir . 'users.txt';
+
+	$accountDir = $fileDir . 'accounts/';
+	if (!file_exists($accountDir)) {
+		mkdir($accountDir);
+	}
+	*/
+
+	#create database and connect to it
+	#comment if not needed
 	$dbDir = __DIR__ . '/db/';
 	if (!file_exists($dbDir)) {
 		mkdir($dbDir);
@@ -17,10 +34,24 @@ try {
 	} catch (PDOException $e) {
 		throw new Exception\DB\DBException($e);
 	}
-	$repoService = new Repository\DbCryptedUserRepository($pdoConnection);
-	$repoAccount = new Repository\DbCryptedAccountRepository($pdoConnection);
-	$userService = new Service\TimeoutUserService($repoService);
-	$accountService = new Service\TimeoutAccountService($repoAccount);
+
+	#create builders
+	$userBuilder = new Builder\CryptedUserBuilder();
+	$accountBuilder = new Builder\CryptedAccountBuilder();
+
+	#create mappers
+	$userMapper = new Mapper\CryptedUserDBMapper();
+	$accountMapper = new Mapper\CryptedAccountDBMapper();
+
+	#create repository
+	$repoUser = new Repository\DbUserRepository($pdoConnection, $userMapper);
+	$repoAccount = new Repository\DbAccountRepository($pdoConnection, $accountMapper);
+	
+	#create service
+	$userService = new Service\TimeoutUserService($repoUser, $userBuilder);
+	$accountService = new Service\TimeoutAccountService($repoAccount, $accountBuilder);
+	
+	#start app
 	$ui = new UI\UI($userService, $accountService);
 	$ui->run();
 } catch (Exception\DB\DBException $e) {

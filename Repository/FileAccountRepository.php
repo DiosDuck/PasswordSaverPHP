@@ -2,50 +2,46 @@
 
 namespace Repository;
 
-use Builder\AccountBuilder;
-use Builder\IBuilder\IAccountBuilder;
-use Entity\Account;
-use Entity\User;
+use Entity\IEntity\IAccount;
+use Entity\IEntity\IUser;
+use Mapper\IMapper\IAccountFileMapper;
 use Repository\AccountRepository;
 
 class FileAccountRepository extends AccountRepository {
 	private string $dirPath;
-	private AccountBuilder $accountBuilder = new AccountBuilder();
+	private IAccountFileMapper $AccountFileMapper;
 	
-	public function __construct(string $dirPath) {
+	public function __construct(string $dirPath, IAccountFileMapper $AccountFileMapper) {
 		parent::__construct();
 		$this->dirPath = $dirPath;
+		$this->AccountFileMapper = $AccountFileMapper;
 		$this->readFromFile();
 	}
 	
 	
-	public function add(Account $account) : Account {
+	public function add(IAccount $account) : IAccount {
 		$account = parent::add($account);
 		$this->writeToFile($account->getUser()->getUsername());
 		return $account;
 	}
-	public function delete(User $user, string $domain) : Account {
+	public function delete(IUser $user, string $domain) : IAccount {
 		$account = parent::delete($user, $domain);
 		$this->writeToFile($user->getUsername());
 		return $account;
 	}
-	public function update(Account $oldAccount, Account $newAccount) : Account {
+	public function update(IAccount $oldAccount, IAccount $newAccount) : IAccount {
 		$account = parent::update($oldAccount, $newAccount);
 		$this->writeToFile($oldAccount->getUser()->getUsername());
 		return $account;
 	}
 	
-	public function deleteAll(User $user) : void {
+	public function deleteAll(IUser $user) : void {
 		parent::deleteAll($user);
 		$username = $user->getUsername();
 		$file = $this->dirPath . $username . '.txt';
 		if (file_exists($file)) {
 			unlink($file);
 		}
-	}
-
-	public function getBuilder() : IAccountBuilder {
-		return $this->accountBuilder;
 	}
 	
 	private function readFromFile() : void {
@@ -56,13 +52,9 @@ class FileAccountRepository extends AccountRepository {
 			if (filesize($this->dirPath . $file)) {
 				$streamFile = fopen($this->dirPath . $file, 'r');
 				while(!feof($streamFile)) {
-					$line = explode(';', str_replace("\n", "", fgets($streamFile)));
-					
-					$this->accountBuilder->createAccount();
-					$this->accountBuilder->setDomain($line[0]);
-					$this->accountBuilder->setUsername($line[1]);
-					$this->accountBuilder->setPassword($line[2]);
-					$account = $this->accountBuilder->getAccount();
+					$line = str_replace("\n", "", fgets($streamFile));
+
+					$account = $this->AccountFileMapper->getAccount($line);
 					
 					$this->accounts[$user][] = $account;
 				}
@@ -74,7 +66,7 @@ class FileAccountRepository extends AccountRepository {
 	private function writeToFile(string $user) : void {
 		$lines = [];
 		foreach($this->accounts[$user] as $account) {
-			$lines[] = $account->getDomain() . ';' . $account->getUsername() . ';' . $account->getPassword();
+			$lines[] = $this->AccountFileMapper->getLine($account);
 		}
 		$output = implode("\n", $lines);
 		$streamFile = fopen($this->dirPath . $user . '.txt', 'w');

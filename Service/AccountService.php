@@ -2,8 +2,8 @@
 
 namespace Service;
 
-use Entity\User;
-use Entity\Account;
+use Entity\IEntity\IUser;
+use Entity\IEntity\IAccount;
 use Utility\AccountListDTO;
 use Repository\IRepository\IAccountRepository;
 use Service\IService\IAccountService;
@@ -13,12 +13,12 @@ class AccountService implements IAccountService {
 	private IAccountRepository $accountRepository;
 	private IAccountBuilder $accountBuilder;
 	
-	public function __construct(IAccountRepository $accountRepository) {
+	public function __construct(IAccountRepository $accountRepository, IAccountBuilder $accountBuilder) {
 		$this->accountRepository = $accountRepository;
-		$this->accountBuilder = $accountRepository->getBuilder();
+		$this->accountBuilder = $accountBuilder;
 	}
 	
-	public function addAccount(User $user, string $domain, string $username, string $password) : void {
+	public function addAccount(IUser $user, string $domain, string $username, string $password) : void {
 		$this->accountBuilder->createAccount();
 		$this->accountBuilder->setUser($user);
 		$this->accountBuilder->setDomain($domain);
@@ -28,24 +28,21 @@ class AccountService implements IAccountService {
 		
 		$this->accountRepository->add($account);
 	}
-	public function deleteAccount(User $user, string $domain) : void {
+	public function deleteAccount(IUser $user, string $domain) : void {
 		$this->accountRepository->delete($user, $domain);
 	}
-	public function getAccountsByDomain(User $user, string $domain) : AccountListDTO {
+	public function getAccountsByDomain(IUser $user, string $domain) : AccountListDTO {
 		$acc = $this->accountRepository->getAllByDomain($user, $domain);
 		return new AccountListDTO($acc);
 	}
 	
-	public function deleteUser(User $user) : void {
+	public function deleteUser(IUser $user) : void {
 		$this->accountRepository->deleteAll($user);
 	}
 	
-	public function updateAccountPassword(User $user, string $domain, string $newPassword) : void {
-		$this->accountBuilder->createAccount();
-		$this->accountBuilder->setUser($user);
-		$this->accountBuilder->setDomain($domain);
-		$this->accountBuilder->setPassword($newPassword);
-		$account = $this->accountBuilder->getAccount();
+	public function updateAccountPassword(IUser $user, string $domain, string $newPassword) : void {
+		$account = $this->accountRepository->get($user, $domain);
+		$account->setPassword($newPassword);
 		
 		$this->accountRepository->update($account, $account);
 	}

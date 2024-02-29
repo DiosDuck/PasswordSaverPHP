@@ -2,13 +2,13 @@
 
 namespace Utility;
 
-use Entity\User;
+use Entity\IEntity\IUser;
 use Entity\TimeoutUser;
 use Exception\Timeout\TimeoutException;
 use Exception\Timeout\WrongUserException;
 
 trait TimeoutCheckTrait {
-	public function checkUserValid(User $user) : TimeoutUser {
+	public function checkUserValid(IUser $user) : TimeoutUser {
 		if (!$user  instanceof TimeoutUser) {
 			throw new WrongUserException();
 		}

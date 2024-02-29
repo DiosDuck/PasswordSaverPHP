@@ -1,7 +1,7 @@
 <?php
 namespace UI;
 
-use Entity\User;
+use Entity\IEntity\IUser;
 use Service\IService\IUserService;
 use Service\IService\IAccountService;
 use Utility\AccountListDTO;
@@ -13,7 +13,7 @@ use Exception\Account\AccountException;
 class UI {
 	private IUserService $userService;
 	private IAccountService $accountService;
-	private ?User $user;
+	private ?IUser $user;
 	
 	use GeneratePasswordTrait;
 	

@@ -4,15 +4,15 @@ namespace Service;
 use Service\IService\IUserService;
 use Repository\IRepository\IUserRepository;
 use Builder\IBuilder\IUserBuilder;
-use Entity\User;
+use Entity\IEntity\IUser;
 
 class UserService implements IUserService {
 	private IUserRepository $userRepository;
 	private IUserBuilder $userBuilder;
 	
-	public function __construct(IUserRepository $userRepository) {
+	public function __construct(IUserRepository $userRepository, IUserBuilder $userBuilder) {
 		$this->userRepository = $userRepository;
-		$this->userBuilder = $userRepository->getBuilder();
+		$this->userBuilder = $userBuilder;
 	}
 	
 	public function createNewUser(string $name, string $username, string $password) : void {
@@ -25,7 +25,7 @@ class UserService implements IUserService {
 		$user = $this->userRepository->add($user);
 	}
 	
-	public function logIn(string $username, string $password) : User {
+	public function logIn(string $username, string $password) : IUser {
 		return $this->userRepository->get($username, $password);
 	}
 	
@@ -33,7 +33,7 @@ class UserService implements IUserService {
 		//at the moment do nothing
 	}
 	
-	public function changePassword(User $user, string $oldPassword, string $newPassword) : User {
+	public function changePassword(IUser $user, string $oldPassword, string $newPassword) : IUser {
 		$oldUser = clone $user;
 		$newUser = clone $user;
 		
@@ -43,7 +43,7 @@ class UserService implements IUserService {
 		return $this->userRepository->update($oldUser, $newUser);
 	}
 	
-	public function changeName(User $user, string $password, string $newName) : User {
+	public function changeName(IUser $user, string $password, string $newName) : IUser {
 		$oldUser = clone $user;
 		$newUser = clone $user;
 		
@@ -54,7 +54,7 @@ class UserService implements IUserService {
 		return $this->userRepository->update($oldUser, $newUser);
 	}
 	
-	public function deleteUser(User $user, string $password) : void {
+	public function deleteUser(IUser $user, string $password) : void {
 		$this->userRepository->delete($user->getUsername(), $password);
 	}
 }

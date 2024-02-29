@@ -2,35 +2,29 @@
 
 namespace Repository;
 
+use Entity\IEntity\IAccount;
+use Entity\IEntity\IUser;
 use Exception\Type\AccountTypeException;
 use PDO;
 use PDOException;
-use Entity\User;
-use Entity\Account;
-use Entity\CryptedAccount;
 use Exception\Account\AccountException;
 use Exception\Account\NotFoundException;
 use Exception\Account\AlreadyExistsException;
 use Repository\IRepository\IAccountRepository;
 use Exception\DB\DBException;
-use Builder\IBuilder\IAccountBuilder;
-use Builder\CryptedAccountBuilder;
+use Mapper\IMapper\IAccountDBMapper;
 
-class DbCryptedAccountRepository implements IAccountRepository {
+class DbAccountRepository implements IAccountRepository {
 	private PDO $pdo;
-	private CryptedAccountBuilder $accountBuilder;
-	
-	public function __construct(PDO $pdo) {
+	private IAccountDBMapper $accountMapper;
+
+	public function __construct(PDO $pdo, IAccountDBMapper $accountMapper) {
 		$this->pdo = $pdo;
-		$this->accountBuilder = new CryptedAccountBuilder();
+		$this->accountMapper = $accountMapper;
 		$this->createTableIfNotExist();
 	}
 	
-	public function add(Account $account) : Account {
-		if (!$account instanceof CryptedAccount) {
-			throw new AccountTypeException();
-		}
-		
+	public function add(IAccount $account) : IAccount {
 		try {
 			try {
 				$this->get($account->getUser(), $account->getDomain());
@@ -39,16 +33,12 @@ class DbCryptedAccountRepository implements IAccountRepository {
 				$this->pdo->beginTransaction();
 				
 				$statement = $this->pdo->prepare(
-					'Insert into accounts(domain, username, password, key, user)
-					values (:domain, :username, :password, :key, :user)');
+					'Insert into accounts(' . $this->accountMapper->getDbParameters() . ')
+					values ( '. $this->accountMapper->getDbInsertParameters() . ' )');
 				
-				$statement->execute([
-					'username' => $account->getUsername(),
-					'domain' => $account->getDomain(),
-					'password' => $account->getRawPassword(),
-					'key' => $account->getKey(),
-					'user' => $account->getUser()->getUsername()
-				]);
+				$statement->execute(
+					$this->accountMapper->getExecutableParameters($account)
+				);
 				
 				$this->pdo->commit();
 				return $account;			
@@ -61,7 +51,7 @@ class DbCryptedAccountRepository implements IAccountRepository {
 		}
 	}
 	
-	public function delete(User $user, string $domain) : Account {
+	public function delete(IUser $user, string $domain) : IAccount {
 		try {
 			$acc = $this->get($user, $domain);
 			
@@ -86,7 +76,7 @@ class DbCryptedAccountRepository implements IAccountRepository {
 	}
 	
 	
-	public function deleteAll(User $user) : void {
+	public function deleteAll(IUser $user) : void {
 		try {
 			$this->pdo->beginTransaction();
 			
@@ -105,10 +95,10 @@ class DbCryptedAccountRepository implements IAccountRepository {
 		}
 	}
 	
-	public function getAll(User $user) : array {
+	public function getAll(IUser $user) : array {
 		try {
 			$statement = $this->pdo->prepare(
-				'Select domain, username, password, key 
+				'Select ' . $this->accountMapper->getDbParameters() . ' 
 				from accounts
 				where user = :user');
 			
@@ -120,15 +110,7 @@ class DbCryptedAccountRepository implements IAccountRepository {
 			$accounts = [];
 			
 			foreach ($data as $row) {
-				$this->accountBuilder->createAccount();
-				$this->accountBuilder->setUsername($row['username']);
-				$this->accountBuilder->setDomain($row['domain']);
-				$this->accountBuilder->setRawPassword($row['password']);
-				$this->accountBuilder->setKey($row['key']);
-				$this->accountBuilder->setUser($user);
-				$account = $this->accountBuilder->getAccount();
-				
-				$accounts[] = $account;
+				$accounts[] = $this->accountMapper->getAccount($row, $user);
 			}
 			
 			return $accounts;
@@ -137,13 +119,13 @@ class DbCryptedAccountRepository implements IAccountRepository {
 		}
 	}
 	
-	public function getAllByDomain(User $user, string $domain) : array {
+	public function getAllByDomain(IUser $user, string $domain) : array {
 		if ($domain == '') {
 			return $this->getAll($user);
 		}
 		try {
 			$statement = $this->pdo->prepare(
-				'Select domain, username, password, key 
+				'Select ' . $this->accountMapper->getDbParameters() . ' 
 				from accounts
 				where user = :user and domain like :domain');
 			
@@ -156,15 +138,7 @@ class DbCryptedAccountRepository implements IAccountRepository {
 			$accounts = [];
 			
 			foreach ($data as $row) {
-				$this->accountBuilder->createAccount();
-				$this->accountBuilder->setUsername($row['username']);
-				$this->accountBuilder->setDomain($row['domain']);
-				$this->accountBuilder->setRawPassword($row['password']);
-				$this->accountBuilder->setKey($row['key']);
-				$this->accountBuilder->setUser($user);
-				$account = $this->accountBuilder->getAccount();
-				
-				$accounts[] = $account;
+				$accounts[] = $this->accountMapper->getAccount($row, $user);
 			}
 			
 			return $accounts;
@@ -174,11 +148,7 @@ class DbCryptedAccountRepository implements IAccountRepository {
 		}
 	}
 	
-	public function update(Account $oldAccount, Account $newAccount) : Account {
-		if (!$newAccount instanceof CryptedAccount) {
-			throw new AccountTypeException();
-		}
-
+	public function update(IAccount $oldAccount, IAccount $newAccount) : IAccount {
 		try {
 			$this->get($oldAccount->getUser(), $oldAccount->getDomain());
 			
@@ -186,15 +156,12 @@ class DbCryptedAccountRepository implements IAccountRepository {
 			
 			$statement = $this->pdo->prepare(
 				'UPDATE accounts
-				SET password = :password, key = :key
+				SET '. $this->accountMapper->getDbUpdateParameters() . '
 				WHERE domain = :domain and user = :user');
 			
-			$statement->execute([
-				'domain' => $newAccount->getDomain(),
-				'password' => $newAccount->getRawPassword(),
-				'key' => $newAccount->getKey(),
-				'user' => $newAccount->getUser()->getUsername()
-			]);
+			$statement->execute(
+				$this->accountMapper->getExecutableParameters($newAccount)
+			);
 			
 			$this->pdo->commit();
 			return $newAccount;
@@ -204,10 +171,10 @@ class DbCryptedAccountRepository implements IAccountRepository {
 		}
 	}
 	
-	public function get(User $user, string $domain) : Account {
+	public function get(IUser $user, string $domain) : IAccount {
 		try {
 			$statement = $this->pdo->prepare(
-				'Select domain, username, password, key 
+				'Select ' . $this->accountMapper->getDbParameters() . '
 				from accounts
 				where user = :user and domain = :domain');
 			
@@ -221,15 +188,7 @@ class DbCryptedAccountRepository implements IAccountRepository {
 				throw new NotFoundException();
 			}
 			
-			$data = $data[0];
-			
-			$this->accountBuilder->createAccount();
-			$this->accountBuilder->setUsername($data['username']);
-			$this->accountBuilder->setDomain($data['domain']);
-			$this->accountBuilder->setRawPassword($data['password']);
-			$this->accountBuilder->setKey($data['key']);
-			$this->accountBuilder->setUser($user);
-			$account = $this->accountBuilder->getAccount();
+			$account = $this->accountMapper->getAccount($data[0], $user);
 			
 			return $account;
 		} catch (PDOException $e) {
@@ -237,24 +196,16 @@ class DbCryptedAccountRepository implements IAccountRepository {
 		}
 	}
 	
-	public function getBuilder() : IAccountBuilder {
-		return $this->accountBuilder;
-	}
-	
 	private function createTableIfNotExist() {
 		try {
 			$this->pdo->beginTransaction();
 			
 			$this->pdo->exec(
-				"CREATE TABLE IF NOT EXISTS accounts 
+				'CREATE TABLE IF NOT EXISTS accounts 
 				(
-					domain varchar(255) PRIMARY KEY,
-					username varchar(255),
-					password varchar(255),
-					key varchar(255),
-					user varchar(255),
-					FOREIGN KEY (user) REFERENCES users(username)
-				)"
+					domain varchar(255) PRIMARY KEY' . $this->accountMapper->getCreateTableNonKeyParameters() . ' 
+					,user varchar(255), FOREIGN KEY (user) REFERENCES users(username)
+				)'
 			);
 			
 			$this->pdo->commit();

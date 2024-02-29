@@ -2,7 +2,6 @@
 
 namespace Entity;
 
-use Entity\User;
 use Entity\Account;
 use Utility\EncryptTrait;
 

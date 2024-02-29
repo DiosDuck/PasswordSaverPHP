@@ -2,13 +2,13 @@
 
 namespace Entity;
 
-use Entity\User;
+use Entity\IEntity\IUser;
 
-class TimeoutUser extends User {
-	private User $user;
+class TimeoutUser implements IUser {
+	private IUser $user;
 	private int $time;
 
-	public function __construct(User $user) {
+	public function __construct(IUser $user) {
 		$this->user = $user;
 		$this->time = time();
 	}
@@ -43,11 +43,11 @@ class TimeoutUser extends User {
 		$this->user->setPassword($password);
 	}
 	
-	public function getUser() : User {
+	public function getUser() : IUser {
 		return $this->user;
 	}
 	
-	public function setUser(User $user) : void {
+	public function setUser(IUser $user) : void {
 		$this->user = $user;
 	}
 	

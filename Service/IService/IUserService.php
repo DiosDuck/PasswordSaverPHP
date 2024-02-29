@@ -1,13 +1,13 @@
 <?php
 namespace Service\IService;
 
-use Entity\User;
+use Entity\IEntity\IUser;
 
 interface IUserService{
 	public function createNewUser(string $name, string $username, string $password) : void;
-	public function logIn(string $username, string $password) : User;
+	public function logIn(string $username, string $password) : IUser;
 	public function logOut() : void;
-	public function changePassword(User $user, string $oldPassword, string $newPassword) : User;
-	public function changeName(User $user, string $password, string $newName) : User;
-	public function deleteUser(User $user, string $password) : void;
+	public function changePassword(IUser $user, string $oldPassword, string $newPassword) : IUser;
+	public function changeName(IUser $user, string $password, string $newName) : IUser;
+	public function deleteUser(IUser $user, string $password) : void;
 }

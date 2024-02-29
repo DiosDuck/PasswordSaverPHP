@@ -2,18 +2,15 @@
 
 namespace Repository;
 
-use Entity\User;
+use Entity\IEntity\IUser;
 use Repository\IRepository\IUserRepository;
 use Exception\Authentification\NotFoundException;
 use Exception\Authentification\WrongPasswordException;
 use Exception\Authentification\AlreadyExistsException;
-use Builder\IBuilder\IUserBuilder;
-use Builder\UserBuilder;
 
 class UserRepository implements IUserRepository {
 	protected array $users;
-	private IUserBuilder $userBuilder = new UserBuilder();
-	
+
 	public function __construct() {
 		$this->users = [];
 	}
@@ -22,7 +19,7 @@ class UserRepository implements IUserRepository {
 		return $this->users;
 	}
 	
-	public function get(string $username, string $password) : User {
+	public function get(string $username, string $password) : IUser {
 		foreach ($this->users as $user) {
 			if ($user->getUsername() == $username) {
 				if ($user->getPassword() == $password) {
@@ -34,7 +31,7 @@ class UserRepository implements IUserRepository {
 		throw new NotFoundException();
 	}
 	
-	public function add(User $newUser) : User {
+	public function add(IUser $newUser) : IUser {
 		foreach ($this->users as $user) {
 			if ($user->getUsername() == $newUser->getUsername()) {
 				throw new AlreadyExistsException();
@@ -44,7 +41,7 @@ class UserRepository implements IUserRepository {
 		return $newUser;
 	}
 	
-	public function delete(string $username, string $password) : User {
+	public function delete(string $username, string $password) : IUser {
 		foreach ($this->users as $key => $user) {
 			if ($user->getUsername() == $username) {
 				if ($user->getPassword() == $password) {
@@ -57,7 +54,7 @@ class UserRepository implements IUserRepository {
 		throw new NotFoundException();
 	}
 	
-	public function update(User $oldUser, User $newUser) : User {
+	public function update(IUser $oldUser, IUser $newUser) : IUser {
 		foreach ($this->users as $user) {
 			if ($user->getUsername() == $oldUser->getUsername()) {
 				if ($user->getPassword() == $oldUser->getPassword()) {
@@ -69,9 +66,5 @@ class UserRepository implements IUserRepository {
 			}
 		}
 		throw new NotFoundException();
-	}
-	
-	public function getBuilder() : IUserBuilder {
-		return $this->userBuilder;
 	}
 }

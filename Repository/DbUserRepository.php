@@ -5,31 +5,29 @@ namespace Repository;
 use Exception\Type\UserTypeException;
 use PDO;
 use PDOException;
-use Entity\User;
-use Entity\CryptedUser;
+use Entity\IEntity\IUser;
 use Repository\IRepository\IUserRepository;
 use Exception\Authentification\AuthentificationException;
 use Exception\Authentification\NotFoundException;
 use Exception\Authentification\WrongPasswordException;
 use Exception\Authentification\AlreadyExistsException;
 use Exception\DB\DBException;
-use Builder\IBuilder\IUserBuilder;
-use Builder\CryptedUserBuilder;
+use Mapper\IMapper\IUserDBMapper;
 
-class DbCryptedUserRepository implements IUserRepository {
+class DbUserRepository implements IUserRepository {
 	private PDO $pdo;
-	private CryptedUserBuilder $userBuilder;
+	private IUserDBMapper $userMapper;
 	
-	public function __construct(PDO $pdo) {
+	public function __construct(PDO $pdo, IUserDBMapper $userMapper) {
 		$this->pdo = $pdo;
-		$this->userBuilder = new CryptedUserBuilder();
+		$this->userMapper = $userMapper;
 		$this->createTableIfNotExist();
 	}
 	
 	public function getAll() : array {
 		try {
 			$statement = $this->pdo->prepare(
-				'Select username, name, password, key from users');
+				'Select ' . $this->userMapper->getDbParameters() . ' from users');
 			
 			$statement->execute([]);
 			
@@ -37,13 +35,7 @@ class DbCryptedUserRepository implements IUserRepository {
 			$users = [];
 			
 			foreach ($data as $row) {
-				$this->userBuilder->createUser();
-				$this->userBuilder->setUsername($row['username']);
-				$this->userBuilder->setName($row['name']);
-				$this->userBuilder->setRawPassword($row['password']);
-				$this->userBuilder->setKey($row['key']);
-				
-				$users[] = $this->userBuilder->getUser();
+				$users[] = $this->userMapper->getUser($row);
 			}
 			
 			return $users;
@@ -52,10 +44,10 @@ class DbCryptedUserRepository implements IUserRepository {
 		}
 	}
 	
-	public function get(string $username, string $password) : User {
+	public function get(string $username, string $password) : IUser {
 		try {
 			$statement = $this->pdo->prepare(
-				'Select username, name, password, key from users
+				'Select ' . $this->userMapper->getDbParameters() . ' from users
 				where username = :username');
 			
 			$statement->execute([
@@ -67,14 +59,7 @@ class DbCryptedUserRepository implements IUserRepository {
 				throw new NotFoundException();
 			}				
 			
-			$data = $data[0];
-			
-			$this->userBuilder->createUser();
-			$this->userBuilder->setUsername($data['username']);
-			$this->userBuilder->setName($data['name']);
-			$this->userBuilder->setRawPassword($data['password']);
-			$this->userBuilder->setKey($data['key']);
-			$user = $this->userBuilder->getUser();
+			$user = $this->userMapper->getUser($data[0]);
 			
 			if ($user->getPassword() != $password) {
 				throw new WrongPasswordException();
@@ -86,11 +71,7 @@ class DbCryptedUserRepository implements IUserRepository {
 		}
 	}
 	
-	public function add(User $user) : User {
-		if (!$user instanceof CryptedUser) {
-			throw new UserTypeException();
-		}
-
+	public function add(IUser $user) : IUser {
 		try {
 			try {
 				$this->get($user->getUsername(), $user->getPassword());
@@ -99,15 +80,12 @@ class DbCryptedUserRepository implements IUserRepository {
 				$this->pdo->beginTransaction();
 				
 				$statement = $this->pdo->prepare(
-					'Insert into users(username, name, password, key)
-					values (:username, :name, :password, :key)');
+					'Insert into users('. $this->userMapper->getDbParameters() . ')
+					values (' . $this->userMapper->getDbInsertParameters() . ')');
 				
-				$statement->execute([
-					'username' => $user->getUsername(),
-					'name' => $user->getName(),
-					'password' => $user->getRawPassword(),
-					'key' => $user->getKey()
-				]);
+				$statement->execute(
+					$this->userMapper->getExecutableParameters($user)
+				);
 				
 				$this->pdo->commit();
 				return $user;
@@ -120,7 +98,7 @@ class DbCryptedUserRepository implements IUserRepository {
 		}
 	}
 	
-	public function delete(string $username, string $password) : User {
+	public function delete(string $username, string $password) : IUser {
 		try {
 			$user = $this->get($username, $password);
 			
@@ -142,11 +120,7 @@ class DbCryptedUserRepository implements IUserRepository {
 		}
 	}
 	
-	public function update(User $oldUser, User $newUser) : User {
-		if (!$newUser instanceof CryptedUser) {
-			throw new UserTypeException();
-		}
-		
+	public function update(IUser $oldUser, IUser $newUser) : IUser {
 		try {
 			$this->get($oldUser->getUsername(), $oldUser->getPassword());
 			
@@ -154,16 +128,12 @@ class DbCryptedUserRepository implements IUserRepository {
 			
 			$statement = $this->pdo->prepare(
 				'UPDATE users
-				SET name = :name, password = :password, key = :key
-				WHERE username = :username
-				');
-			
-			$statement->execute([
-				'username' => $newUser->getUsername(),
-				'name' => $newUser->getName(),
-				'password' => $newUser->getRawPassword(),
-				'key' => $newUser->getKey()
-			]);
+				SET ' . $this->userMapper->getDbUpdateParameters() . '
+				WHERE username = :username'
+			);
+			$statement->execute(
+				$this->userMapper->getExecutableParameters($newUser)
+			);
 			
 			$this->pdo->commit();
 			return $newUser;
@@ -173,22 +143,13 @@ class DbCryptedUserRepository implements IUserRepository {
 		}
 	}
 	
-	public function getBuilder() : IUserBuilder {
-		return $this->userBuilder;
-	}
-	
 	private function createTableIfNotExist() {
 		try {
 			$this->pdo->beginTransaction();
 			
 			$this->pdo->exec(
-				"CREATE TABLE IF NOT EXISTS users 
-				(
-					username varchar(255) PRIMARY KEY,
-					name varchar(255),
-					password varchar(255),
-					key varchar(255)
-				)"
+				'CREATE TABLE IF NOT EXISTS users 
+				( username varchar(255) PRIMARY KEY' . $this->userMapper->getCreateTableNonKeyParameters() . ')'
 			);
 			
 			$this->pdo->commit();

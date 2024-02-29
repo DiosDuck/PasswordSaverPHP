@@ -2,11 +2,12 @@
 
 namespace Builder;
 
+use Entity\IEntity\IUser;
 use Entity\User;
 use Builder\IBuilder\IUserBuilder;
 
 class UserBuilder implements IUserBuilder {
-	protected User $user;
+	protected IUser $user;
 	
 	public function createUser() : void {
 		$this->user = new User();
@@ -23,7 +24,7 @@ class UserBuilder implements IUserBuilder {
 	public function setName(string $name) : void {
 		$this->user->setName($name);
 	}
-	public function getUser() : User {
+	public function getUser() : IUser {
 		return $this->user;
 	}
 }

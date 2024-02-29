@@ -2,23 +2,20 @@
 
 namespace Repository;
 
-use Entity\User;
-use Entity\Account;
+use Entity\IEntity\IUser;
+use Entity\IEntity\IAccount;
 use Exception\Account\NotFoundException;
 use Exception\Account\AlreadyExistsException;
 use Repository\IRepository\IAccountRepository;
-use Builder\IBuilder\IAccountBuilder;
-use Builder\AccountBuilder;
 
 class AccountRepository implements IAccountRepository {
 	protected array $accounts;
-	private IAccountBuilder $accountBuilder = new AccountBuilder();
 	
 	public function __construct() {
 		$this->accounts = [];
 	}
 	
-	public function add(Account $account) : Account {
+	public function add(IAccount $account) : IAccount {
 		$user = $account->getUser()->getUsername();
 		if (!isset($this->accounts[$user])) {
 			$this->accounts[$user] = [$account];
@@ -33,7 +30,7 @@ class AccountRepository implements IAccountRepository {
 		return $account;
 	}
 	
-	public function delete(User $user, string $domain) : Account {
+	public function delete(IUser $user, string $domain) : IAccount {
 		$user = $user->getUsername();
 		if (!isset($this->accounts[$user])) {
 			throw new NotFoundException();
@@ -48,7 +45,7 @@ class AccountRepository implements IAccountRepository {
 		throw new NotFoundException();
 	}
 	
-	public function getAll(User $user) : array {
+	public function getAll(IUser $user) : array {
 		$username = $user->getUsername();
 		if (!isset($this->accounts[$username])) {
 			return [];
@@ -56,7 +53,7 @@ class AccountRepository implements IAccountRepository {
 		return $this->accounts[$username];
 	}
 	
-	public function getAllByDomain(User $user, string $domain) : array {
+	public function getAllByDomain(IUser $user, string $domain) : array {
 		$username = $user->getUsername();
 		if (!isset($this->accounts[$username])) {
 			return [];
@@ -70,7 +67,7 @@ class AccountRepository implements IAccountRepository {
 		return $acc;
 	}
 	
-	public function update(Account $oldAccount, Account $newAccount) : Account {
+	public function update(IAccount $oldAccount, IAccount $newAccount) : IAccount {
 		$user = $oldAccount->getUser()->getUsername();
 		if (!isset($this->accounts[$user])) {
 			throw new NotFoundException();
@@ -84,7 +81,7 @@ class AccountRepository implements IAccountRepository {
 		throw new NotFoundException();
 	}
 	
-	public function get(User $user, string $domain) : Account {
+	public function get(IUser $user, string $domain) : IAccount {
 		$user = $user->getUsername();
 		if (!isset($this->accounts[$user])) {
 			throw new NotFoundException();
@@ -97,14 +94,10 @@ class AccountRepository implements IAccountRepository {
 		throw new NotFoundException();
 	}
 	
-	public function deleteAll(User $user) : void {
+	public function deleteAll(IUser $user) : void {
 		$user = $user->getUsername();
 		if (isset($this->accounts[$user])) {
 			unset($this->accounts[$user]);
 		}	
-	}
-	
-	public function getBuilder() : IAccountBuilder {
-		return $this->accountBuilder;
 	}
 }

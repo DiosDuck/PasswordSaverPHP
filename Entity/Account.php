@@ -2,15 +2,16 @@
 
 namespace Entity;
 
-use Entity\User;
+use Entity\IEntity\IAccount;
+use Entity\IEntity\IUser;
 
-class Account {
-	private User $user;
+class Account implements IAccount {
+	private IUser $user;
 	private string $domain;
 	private string $username;
 	private string $password;
 	
-	public function getUser() : User {
+	public function getUser() : IUser {
 		return $this->user;
 	}
 	
@@ -26,7 +27,7 @@ class Account {
 		return $this->password;
 	}
 	
-	public function setUser(User $user) : void
+	public function setUser(IUser $user) : void
 	{
 		$this->user = $user;
 	}
