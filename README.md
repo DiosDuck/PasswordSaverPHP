@@ -18,11 +18,32 @@ Download the code from GitHub and you should be able to use it by executing the 
 
 ## Usage and customization
 
-In `main.php` file there are 3 big classes: UI, Service and Repository.
+In `main.php` file there are 5 big group of classes: UI, Service, Repository, Builder and Mapper.
 
-If you want to change the method of uses, here is a short sum up:
-- **In memory usage**: to use the in memory usage **not encrypted**, use the **UserRepository** and **AccountRepository** classes without any parameters, any service can be used.
-- **In file usage**: to save the accounts in files **encrypted or not**, use the **FileUserRepository** (or **FileCryptedUserRepository**) and **FileAccountRepository** (or **FileCryptedAccountRepository**) to save the data in files, any service can be used. You need to specify as a path the user file path and the account folder for each user.
-- **In DB usage (Default)**: to save the accounts in DB **only encrypted**, use **DBCryptedUserRepository** and **DBCryptedAccountRepository**, any service can be used. You need to specify as a path the DB path, which **both user and accounts** are using.
-- **Without timeout**: to have user be able to timeout, use **UserService** and **AccountService** without any parameters, any repository can be user.
-- **Timeout (Default)**: to have user be able to timeout, use **TimeoutUserService** and **TimeoutAccountService** without any parameters, any repository can be user.
+### UI
+**UI** is the main class which focus is to display the data to the user throw the console. It contains a trait to help generating password (for the option to generate them automatically) and the services for user management and their accounts.
+
+### Service
+**Service** represents the tie between UI and the rest of the code, changing the data received from the user in code data. It contains two classes: a repository and a builder. As of the customization, there are two stuff:
+- **Classic** which does the basic stuff of connecting the UI with the rest of the code
+- **Timeout (default)** which adds an extra future of timeout which lasts 5 minutes since the last change of data
+
+### Builder
+**Builder** represents the format of the class the user want to, takes the input data and converts to the class the user wants. There are two type of objects:
+- **Classic** which the data corresponds with the input of the user
+- **Crypted (default)** which encrypt and decrypts the password corresponded with a specific key generated at runtime, it's suggested to be used for data saving
+
+### Repository
+**Repository** represents the data collector which makes the CRUD operations on the data. Each repository contains different data, depending of the mod they want to use it:
+- **Classic** which is the in memory way to save the data. On closing the app, the data will be lost.
+- **File** which uses files to read and write data. The data will be saved in those files and depending of the Mapper either can be classic or encrypted
+- **DataBase (default)** which uses the database to stock the data. As for the File Repository, it can be either classic or encrypted
+
+### Mapper
+**Mapper** is used on File and Database data. Their purpose is to convert string into objects, while also automatically using the specific data the User want to
+> **_NOTE:_** the Mapper should use the same type as the Builder uses, or else there will be an error thrown!
+
+## Conculsion
+
+Thanks for taking your time to read this and hope the code was useful to you :)
+
