@@ -5,6 +5,7 @@ namespace Mapper;
 use Entity\IEntity\IAccount;
 use Entity\CryptedAccount;
 use Entity\IEntity\IUser;
+use Exception\Type\AccountTypeException;
 use Mapper\AccountDBMapper;
 
 class CryptedAccountDBMapper extends AccountDBMapper {
@@ -19,7 +20,7 @@ class CryptedAccountDBMapper extends AccountDBMapper {
     }
     public function getExecutableParameters(IAccount $account) : array {
         if (!$account instanceof CryptedAccount) {
-            throw new \Exception();
+            throw new AccountTypeException();
         }
         return [
             'domain' => $account->getDomain(),

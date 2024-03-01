@@ -4,12 +4,13 @@ namespace Mapper;
 
 use Entity\CryptedUser;
 use Entity\IEntity\IUser;
+use Exception\Type\UserTypeException;
 use Mapper\IMapper\IUserFileMapper;
 
 class CryptedUserFileMapper implements IUserFileMapper {
     public function getLine(IUser $user) :  string {
         if (!$user instanceof CryptedUser) {
-            throw new \Exception();
+            throw new UserTypeException();
         }
         return $user->getName() . ';' . $user->getUsername() . ';' . $user->getRawPassword() . ';' . bin2hex($user->getKey());
     }   

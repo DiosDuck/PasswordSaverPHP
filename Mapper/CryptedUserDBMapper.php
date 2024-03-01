@@ -4,6 +4,7 @@ namespace Mapper;
 
 use Entity\IEntity\IUser;
 use Entity\CryptedUser;
+use Exception\Type\UserTypeException;
 use Mapper\UserDBMapper;
 
 class CryptedUserDBMapper extends UserDBMapper {
@@ -18,7 +19,7 @@ class CryptedUserDBMapper extends UserDBMapper {
     }
     public function getExecutableParameters(IUser $user) : array {
         if (!$user instanceof CryptedUser) {
-            throw new \Exception();
+            throw new UserTypeException();
         }
         return [
             'name' => $user->getName(),

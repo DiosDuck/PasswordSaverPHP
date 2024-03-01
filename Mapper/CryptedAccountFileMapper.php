@@ -4,12 +4,13 @@ namespace Mapper;
 
 use Entity\IEntity\IAccount;
 use Entity\CryptedAccount;
+use Exception\Type\AccountTypeException;
 use Mapper\IMapper\IAccountFileMapper;
 
 class CryptedAccountFileMapper implements IAccountFileMapper {
     public function getLine(IAccount $account) : string {
         if (!$account instanceof CryptedAccount) {
-            throw new \Exception();
+            throw new AccountTypeException();
         }
         return $account->getDomain() . ';' . $account->getUsername() . ';' . $account->getRawPassword() . ';' . bin2hex($account->getKey());
     }

@@ -2,7 +2,6 @@
 
 namespace Repository;
 
-use Exception\Type\UserTypeException;
 use PDO;
 use PDOException;
 use Entity\IEntity\IUser;

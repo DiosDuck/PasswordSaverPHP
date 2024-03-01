@@ -2,11 +2,10 @@
 
 namespace Repository;
 
-use Entity\IEntity\IAccount;
-use Entity\IEntity\IUser;
-use Exception\Type\AccountTypeException;
 use PDO;
 use PDOException;
+use Entity\IEntity\IAccount;
+use Entity\IEntity\IUser;
 use Exception\Account\AccountException;
 use Exception\Account\NotFoundException;
 use Exception\Account\AlreadyExistsException;
