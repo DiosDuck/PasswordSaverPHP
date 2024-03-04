@@ -6,39 +6,79 @@ use Entity\IEntity\IUser;
 use Entity\CryptedUser;
 use Exception\Type\UserTypeException;
 use Mapper\UserDBMapper;
+use SqlQuery\Property\Property;
+use SqlQuery\Property\PrimaryKeyProperty;
 
 class CryptedUserDBMapper extends UserDBMapper {
-    public function getDbParameters() : string {
-        return parent::getDbParameters() . ', key';
+    public function getInsertQuery() : string {
+        return $this->sqlQuery->getInsertQuery(
+            "user",
+            ["username", "name", "password", "key"]
+        );
     }
-    public function getDbInsertParameters() : string {
-        return parent::getDbInsertParameters() . ', :key';
-    }
-    public function getDbUpdateParameters() : string {
-        return parent::getDbUpdateParameters() . ', key = :key';
-    }
-    public function getExecutableParameters(IUser $user) : array {
+    public function getInsertParameters(IUser $user) : array {
         if (!$user instanceof CryptedUser) {
             throw new UserTypeException();
         }
         return [
-            'name' => $user->getName(),
-            'username' => $user->getUsername(),
-            'password' => $user->getRawPassword(),
-            'key' => $user->getKey()
+            "username" => $user->getUsername(),
+            "name" => $user->getName(),
+            "password" => $user->getRawPassword(),
+            "key" => $user->getKey()
         ];
     }
-    public function getUser(array $array) : IUser {
+
+    public function getOneSelectQuery() : string {
+        return $this->sqlQuery->getSelectQuery(
+            "user",
+            ["username", "name", "password", "key"],
+            ["username"]
+        );
+    }
+
+    public function getSelectQuery() : string {
+        return $this->sqlQuery->getSelectQuery(
+            "user",
+            ["username", "name", "password", "key"]
+        );
+    }
+    public function getUpdateQuery() : string {
+        return $this->sqlQuery->getUpdateQuery(
+            "user",
+            ["name", "password", "key"],
+            ["username"]
+        );
+    }
+    public function getUpdateParameters(IUser $user) : array {
+        if (!$user instanceof CryptedUser) {
+            throw new UserTypeException();
+        }
+        return [
+            "username" => $user->getUsername(),
+            "name" => $user->getName(),
+            "password" => $user->getRawPassword(),
+            "key" => $user->getKey()
+        ];
+    }
+    public function getCreateTableQuery() : string {
+        return $this->sqlQuery->getCreateQuery(
+            "user",
+            [
+                new PrimaryKeyProperty("username", "VARCHAR(255)"),
+                new Property("name", "VARCHAR(255)"),
+                new Property("password", "VARCHAR(255)"),
+                new Property("key", "VARCHAR(255)")
+            ]
+        );
+    }
+    public function getUser(array $data) : IUser {
         $user = new CryptedUser();
 
-        $user->setName($array['name']);
-        $user->setUsername($array['username']);
-        $user->setRawPassword($array['password']);
-        $user->setKey($array['key']);
-
+        $user->setUsername($data["username"]);
+        $user->setName($data["name"]);
+        $user->setRawPassword($data["password"]);
+        $user->setKey($data["key"]);
+        
         return $user;
-    }
-    public function getCreateTableNonKeyParameters() : string {
-        return parent::getCreateTableNonKeyParameters() . ',key varchar(255)';
     }
 }

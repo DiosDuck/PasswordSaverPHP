@@ -26,7 +26,8 @@ class DbUserRepository implements IUserRepository {
 	public function getAll() : array {
 		try {
 			$statement = $this->pdo->prepare(
-				'Select ' . $this->userMapper->getDbParameters() . ' from users');
+				$this->userMapper->getSelectQuery()
+			);
 			
 			$statement->execute([]);
 			
@@ -46,12 +47,12 @@ class DbUserRepository implements IUserRepository {
 	public function get(string $username, string $password) : IUser {
 		try {
 			$statement = $this->pdo->prepare(
-				'Select ' . $this->userMapper->getDbParameters() . ' from users
-				where username = :username');
+				$this->userMapper->getOneSelectQuery()
+			);
 			
-			$statement->execute([
-				'username' => $username
-			]);
+			$statement->execute(
+				$this->userMapper->getOneSelectParameters($username)
+			);
 			
 			$data = $statement->fetchAll();
 			if (count($data) != 1) {
@@ -79,11 +80,11 @@ class DbUserRepository implements IUserRepository {
 				$this->pdo->beginTransaction();
 				
 				$statement = $this->pdo->prepare(
-					'Insert into users('. $this->userMapper->getDbParameters() . ')
-					values (' . $this->userMapper->getDbInsertParameters() . ')');
+					$this->userMapper->getInsertQuery()
+				);
 				
 				$statement->execute(
-					$this->userMapper->getExecutableParameters($user)
+					$this->userMapper->getInsertParameters($user)
 				);
 				
 				$this->pdo->commit();
@@ -104,12 +105,12 @@ class DbUserRepository implements IUserRepository {
 			$this->pdo->beginTransaction();
 			
 			$statement = $this->pdo->prepare(
-				'DELETE FROM users
-				WHERE username = :username');
+				$this->userMapper->getDeleteQuery()
+			);
 			
-			$statement->execute([
-				'username' => $username
-			]);
+			$statement->execute(
+				$this->userMapper->getDeleteParameters($username)
+			);
 			
 			$this->pdo->commit();
 			return $user;
@@ -126,12 +127,10 @@ class DbUserRepository implements IUserRepository {
 			$this->pdo->beginTransaction();
 			
 			$statement = $this->pdo->prepare(
-				'UPDATE users
-				SET ' . $this->userMapper->getDbUpdateParameters() . '
-				WHERE username = :username'
+				$this->userMapper->getUpdateQuery()
 			);
 			$statement->execute(
-				$this->userMapper->getExecutableParameters($newUser)
+				$this->userMapper->getUpdateParameters($newUser)
 			);
 			
 			$this->pdo->commit();
@@ -147,8 +146,7 @@ class DbUserRepository implements IUserRepository {
 			$this->pdo->beginTransaction();
 			
 			$this->pdo->exec(
-				'CREATE TABLE IF NOT EXISTS users 
-				( username varchar(255) PRIMARY KEY' . $this->userMapper->getCreateTableNonKeyParameters() . ')'
+				$this->userMapper->getCreateTableQuery()
 			);
 			
 			$this->pdo->commit();

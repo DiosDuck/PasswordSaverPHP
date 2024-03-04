@@ -40,7 +40,8 @@ try {
 	$accountBuilder = new Builder\CryptedAccountBuilder();
 
 	#create mappers
-	$userMapper = new Mapper\CryptedUserDBMapper();
+	$sqlQuery = new SqlQuery\SqlQuery();
+	$userMapper = new Mapper\CryptedUserDBMapper($sqlQuery);
 	$accountMapper = new Mapper\CryptedAccountDBMapper();
 
 	#create repository
