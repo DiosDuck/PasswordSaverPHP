@@ -1,11 +1,11 @@
 <?php
 
-namespace Mapper;
+namespace Mapper\File;
 
 use Entity\CryptedUser;
 use Entity\IEntity\IUser;
 use Exception\Type\UserTypeException;
-use Mapper\IMapper\IUserFileMapper;
+use Mapper\File\IMapper\IUserFileMapper;
 
 class CryptedUserFileMapper implements IUserFileMapper {
     public function getLine(IUser $user) :  string {

@@ -11,7 +11,7 @@ use Exception\Account\NotFoundException;
 use Exception\Account\AlreadyExistsException;
 use Repository\IRepository\IAccountRepository;
 use Exception\DB\DBException;
-use Mapper\IMapper\IAccountDBMapper;
+use Mapper\DB\IMapper\IAccountDBMapper;
 
 class DbAccountRepository implements IAccountRepository {
 	private PDO $pdo;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Mapper\IMapper;
+namespace Mapper\DB\IMapper;
 
 use Entity\IEntity\IUser;
 

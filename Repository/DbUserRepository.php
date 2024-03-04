@@ -11,7 +11,7 @@ use Exception\Authentification\NotFoundException;
 use Exception\Authentification\WrongPasswordException;
 use Exception\Authentification\AlreadyExistsException;
 use Exception\DB\DBException;
-use Mapper\IMapper\IUserDBMapper;
+use Mapper\DB\IMapper\IUserDBMapper;
 
 class DbUserRepository implements IUserRepository {
 	private PDO $pdo;

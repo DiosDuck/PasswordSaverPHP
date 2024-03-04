@@ -1,10 +1,10 @@
 <?php
 
-namespace Mapper;
+namespace Mapper\File;
 
 use Entity\IEntity\IAccount;
 use Entity\Account;
-use Mapper\IMapper\IAccountFileMapper;
+use Mapper\File\IMapper\IAccountFileMapper;
 
 class AccountFileMapper implements IAccountFileMapper {
     public function getLine(IAccount $account) : string {

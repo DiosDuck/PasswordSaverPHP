@@ -1,10 +1,10 @@
 <?php
 
-namespace Mapper;
+namespace Mapper\File;
 
 use Entity\User;
 use Entity\IEntity\IUser;
-use Mapper\IMapper\IUserFileMapper;
+use Mapper\File\IMapper\IUserFileMapper;
 
 class UserFileMapper implements IUserFileMapper {
     public function getLine(IUser $user) :  string {

@@ -4,7 +4,7 @@ namespace Repository;
 
 use Entity\IEntity\IAccount;
 use Entity\IEntity\IUser;
-use Mapper\IMapper\IAccountFileMapper;
+use Mapper\File\IMapper\IAccountFileMapper;
 use Repository\AccountRepository;
 
 class FileAccountRepository extends AccountRepository {

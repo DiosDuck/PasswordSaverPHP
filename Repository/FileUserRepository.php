@@ -3,7 +3,7 @@
 namespace Repository;
 
 use Entity\IEntity\IUser;
-use Mapper\IMapper\IUserFileMapper;
+use Mapper\File\IMapper\IUserFileMapper;
 use Repository\UserRepository;
 
 class FileUserRepository extends UserRepository {

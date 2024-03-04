@@ -1,11 +1,11 @@
 <?php
 
-namespace Mapper;
+namespace Mapper\File;
 
 use Entity\IEntity\IAccount;
 use Entity\CryptedAccount;
 use Exception\Type\AccountTypeException;
-use Mapper\IMapper\IAccountFileMapper;
+use Mapper\File\IMapper\IAccountFileMapper;
 
 class CryptedAccountFileMapper implements IAccountFileMapper {
     public function getLine(IAccount $account) : string {

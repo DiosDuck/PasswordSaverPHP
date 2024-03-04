@@ -1,41 +1,47 @@
 <?php
 
-namespace Mapper;
+namespace Mapper\DB;
 
 use Entity\IEntity\IAccount;
-use Entity\Account;
+use Entity\CryptedAccount;
 use Entity\IEntity\IUser;
-use Mapper\IMapper\IAccountDBMapper;
+use Exception\Type\AccountTypeException;
+use Mapper\DB\AccountDBMapper;
 
-class AccountDBMapper implements IAccountDBMapper {
+class CryptedAccountDBMapper extends AccountDBMapper {
     public function getDbParameters() : string {
-        return 'domain, username, password, user';
+        return parent::getDbParameters() . ', key';
     }
     public function getDbInsertParameters() : string {
-        return ':domain, :username, :password, :user';
+        return parent::getDbInsertParameters() . ', :key';
     }
     public function getDbUpdateParameters() : string {
-        return 'username = :username, password = :password';
+        return parent::getDbUpdateParameters() . ', key = :key';
     }
     public function getExecutableParameters(IAccount $account) : array {
+        if (!$account instanceof CryptedAccount) {
+            throw new AccountTypeException();
+        }
         return [
             'domain' => $account->getDomain(),
             'username' => $account->getUsername(),
-            'password' => $account->getPassword(),
+            'password' => $account->getRawPassword(),
+            'key' => $account->getKey(),
             'user' => $account->getUser()->getUsername()
         ];
     }
     public function getAccount(array $array, IUser $user) : IAccount {
-        $account = new Account();
+        $account = new CryptedAccount();
 
         $account->setDomain($array['domain']);
         $account->setUsername($array['username']);
-        $account->setPassword($array['password']);
+        $account->setRawPassword($array['password']);
+        $account->setKey($array['key']);
         $account->setUser($user);
 
         return $account;
     }
     public function getCreateTableNonKeyParameters() : string {
-        return ',username varchar(255),password varchar(255)';
+        return parent::getCreateTableNonKeyParameters() . ',key varchar(255)';
     }
 }

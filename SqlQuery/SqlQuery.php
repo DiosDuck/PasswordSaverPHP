@@ -2,6 +2,7 @@
 
 namespace SqlQuery;
 
+use SqlQuery\Condition\ICondition\ICondition;
 use SqlQuery\Property\ForeignKeyConstraint;
 
 class SqlQuery {
@@ -11,26 +12,26 @@ class SqlQuery {
         );
     }
 
-    public function getSelectQuery(string $table, array $getColumns, array $whereColumns = []) : string {
+    public function getSelectQuery(string $table, array $getColumns, ?ICondition $conditon = null) : string {
         $rows = [
             $this->select($getColumns),
             $this->from($table)
         ];
-        if ($whereColumns) {
-            $rows[] = $this->where($whereColumns);
+        if ($conditon) {
+            $rows[] = $this->where($conditon);
         }
         return $this->query($rows);
     }
 
-    public function getUpdateQuery(string $table, array $setColumns, array $whereColumns) : string {
+    public function getUpdateQuery(string $table, array $setColumns, ICondition $conditon) : string {
         return $this->query(
-            [$this->update($table), $this->set($setColumns), $this->where($whereColumns)]
+            [$this->update($table), $this->set($setColumns), $this->where($conditon)]
         );
     }
 
-    public function getDeleteQuery(string $table, array $whereColumns) : string {
+    public function getDeleteQuery(string $table, ICondition $conditon) : string {
         return $this->query(
-            [$this->delete($table), $this->where($whereColumns)]
+            [$this->delete($table), $this->where($conditon)]
         );
     }
 
@@ -60,8 +61,8 @@ class SqlQuery {
         return 'From ' . $table;
     }
 
-    private function where(array $columns) : string {
-        return 'Where ' . implode(' AND ', array_map(function ($column) {return $column .  '=:' . $column;}, $columns));
+    private function where(ICondition $conditon) : string {
+        return 'Where ' . $conditon->getCondition();
     }
 
     private function delete(string $table) : string {
