@@ -95,7 +95,7 @@ class AccountDBMapper implements IAccountDBMapper {
     public function getSelectMultipleDomainParameters(IUser $user, string $domain) : array{
         return [
             "user" => $user->getUsername(),
-            "domain" => $domain
+            "domain" => "%$domain%"
         ];
     }
     public function getUpdateQuery() : string {
@@ -125,12 +125,13 @@ class AccountDBMapper implements IAccountDBMapper {
             new ForeignKeyConstraint("user", "user", "username")
         );
     }
-    public function getAccount(array $data) : IAccount {
+    public function getAccount(array $data, IUser $user) : IAccount {
         $account = new Account();
 
         $account->setDomain($data["domain"]);
         $account->setPassword($data["password"]);
         $account->setUsername($data["username"]);
+        $account->setUser($user);
 
         return $account;
     }

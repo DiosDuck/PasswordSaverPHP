@@ -11,7 +11,7 @@ interface IAccountDBMapper {
     public function getOneSelectQuery() : string;
     public function getOneSelectParameters(IUser $user, string $domain) : array;
     public function getDeleteQuery() : string;
-    public function getDeleteParameters(IUser $user, string $username) : array;
+    public function getDeleteParameters(IUser $user, string $domain) : array;
     public function getDeleteByUserQuery() : string;
     public function getDeleteByUserParameters(IUser $user) : array;
     public function getSelectQuery() : string;
@@ -21,5 +21,5 @@ interface IAccountDBMapper {
     public function getUpdateQuery() : string;
     public function getUpdateParameters(IAccount $account) : array;
     public function getCreateTableQuery() : string;
-    public function getAccount(array $data) : IAccount;
+    public function getAccount(array $data, IUser $user) : IAccount;
 }

@@ -14,6 +14,6 @@ class LikeCondition implements ICondition{
 
     public function getCondition(): string
     {
-        return $this->parameter . ' LIKE %' . $this->parameter . '%';
+        return $this->parameter . ' LIKE :' . $this->parameter;
     }
 }

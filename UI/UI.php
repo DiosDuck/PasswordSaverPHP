@@ -73,7 +73,7 @@ class UI {
 	
 	private function welcomePageLogged() : array {
 		$this->printDisplayText(
-			"Welcome," . $this->user->getName() . "!",
+			"Welcome, " . $this->user->getName() . "!",
 			"How can I help you?",
 			["Manage accounts", "Change password", "Change name", "Delete the user", "Logout"]
 		);

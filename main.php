@@ -42,7 +42,7 @@ try {
 	#create mappers
 	$sqlQuery = new SqlQuery\SqlQuery();
 	$userMapper = new Mapper\DB\CryptedUserDBMapper($sqlQuery);
-	$accountMapper = new Mapper\DB\CryptedAccountDBMapper();
+	$accountMapper = new Mapper\DB\CryptedAccountDBMapper($sqlQuery);
 
 	#create repository
 	$repoUser = new Repository\DbUserRepository($pdoConnection, $userMapper);

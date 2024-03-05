@@ -32,11 +32,11 @@ class DbAccountRepository implements IAccountRepository {
 				$this->pdo->beginTransaction();
 				
 				$statement = $this->pdo->prepare(
-					'Insert into accounts(' . $this->accountMapper->getDbParameters() . ')
-					values ( '. $this->accountMapper->getDbInsertParameters() . ' )');
+					$this->accountMapper->getInsertQuery()
+				);
 				
 				$statement->execute(
-					$this->accountMapper->getExecutableParameters($account)
+					$this->accountMapper->getInsertParameters($account)
 				);
 				
 				$this->pdo->commit();
@@ -57,13 +57,12 @@ class DbAccountRepository implements IAccountRepository {
 			$this->pdo->beginTransaction();
 			
 			$statement = $this->pdo->prepare(
-				'DELETE from accounts
-				where user = :user and domain = :domain');
+				$this->accountMapper->getDeleteQuery()
+			);
 			
-			$statement->execute([
-				'user' => $user->getUsername(),
-				'domain' => $domain
-			]);
+			$statement->execute(
+				$this->accountMapper->getDeleteParameters($user, $domain)
+			);
 			
 			$this->pdo->commit();
 			
@@ -80,12 +79,12 @@ class DbAccountRepository implements IAccountRepository {
 			$this->pdo->beginTransaction();
 			
 			$statement = $this->pdo->prepare(
-				'DELETE from accounts
-				where user = :user');
+				$this->accountMapper->getDeleteByUserQuery()
+			);
 			
-			$statement->execute([
-				'user' => $user->getUsername()
-			]);
+			$statement->execute(
+				$this->accountMapper->getDeleteByUserParameters($user)
+			);
 			
 			$this->pdo->commit();
 		} catch (PDOException $e) {
@@ -97,13 +96,12 @@ class DbAccountRepository implements IAccountRepository {
 	public function getAll(IUser $user) : array {
 		try {
 			$statement = $this->pdo->prepare(
-				'Select ' . $this->accountMapper->getDbParameters() . ' 
-				from accounts
-				where user = :user');
+				$this->accountMapper->getSelectQuery()
+			);
 			
-			$statement->execute([
-				'user' => $user->getUsername()
-			]);
+			$statement->execute(
+				$this->accountMapper->getSelectParameters($user)
+			);
 			
 			$data = $statement->fetchAll();
 			$accounts = [];
@@ -124,14 +122,14 @@ class DbAccountRepository implements IAccountRepository {
 		}
 		try {
 			$statement = $this->pdo->prepare(
-				'Select ' . $this->accountMapper->getDbParameters() . ' 
-				from accounts
-				where user = :user and domain like :domain');
+				$this->accountMapper->getSelectMultipleDomainQuery()
+			);
 			
-			$statement->execute([
-				'user' => $user->getUsername(),
-				'domain' => '%' . $domain . '%'
-			]);
+			$statement->execute(
+				$this->accountMapper->getSelectMultipleDomainParameters(
+					$user, $domain
+				)
+			);
 			
 			$data = $statement->fetchAll();
 			$accounts = [];
@@ -142,7 +140,6 @@ class DbAccountRepository implements IAccountRepository {
 			
 			return $accounts;
 		} catch (PDOException $e) {
-			$this->pdo->rollBack();
 			throw new DBException($e);
 		}
 	}
@@ -154,12 +151,11 @@ class DbAccountRepository implements IAccountRepository {
 			$this->pdo->beginTransaction();
 			
 			$statement = $this->pdo->prepare(
-				'UPDATE accounts
-				SET '. $this->accountMapper->getDbUpdateParameters() . '
-				WHERE domain = :domain and user = :user');
+				$this->accountMapper->getUpdateQuery()
+			);
 			
 			$statement->execute(
-				$this->accountMapper->getExecutableParameters($newAccount)
+				$this->accountMapper->getUpdateParameters($newAccount)
 			);
 			
 			$this->pdo->commit();
@@ -173,14 +169,12 @@ class DbAccountRepository implements IAccountRepository {
 	public function get(IUser $user, string $domain) : IAccount {
 		try {
 			$statement = $this->pdo->prepare(
-				'Select ' . $this->accountMapper->getDbParameters() . '
-				from accounts
-				where user = :user and domain = :domain');
+				$this->accountMapper->getOneSelectQuery()
+			);
 			
-			$statement->execute([
-				'user' => $user->getUsername(),
-				'domain' => $domain
-			]);
+			$statement->execute(
+				$this->accountMapper->getOneSelectParameters($user,$domain)
+			);
 			
 			$data = $statement->fetchAll();
 			if (count ($data) != 1) {
@@ -200,11 +194,7 @@ class DbAccountRepository implements IAccountRepository {
 			$this->pdo->beginTransaction();
 			
 			$this->pdo->exec(
-				'CREATE TABLE IF NOT EXISTS accounts 
-				(
-					domain varchar(255) PRIMARY KEY' . $this->accountMapper->getCreateTableNonKeyParameters() . ' 
-					,user varchar(255), FOREIGN KEY (user) REFERENCES users(username)
-				)'
+				$this->accountMapper->getCreateTableQuery()
 			);
 			
 			$this->pdo->commit();
