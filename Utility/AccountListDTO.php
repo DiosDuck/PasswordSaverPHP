@@ -1,12 +1,13 @@
 <?php
 
 namespace Utility;
+use Entity\VisibilityAccount;
 
 class AccountListDTO {
 	private array $accounts;
 	
 	public function __construct(array $accounts = []) {
-		$this->accounts = $accounts;
+		$this->accounts = array_map(function($account) {return new VisibilityAccount($account);}, $accounts);
 	}
 	
 	public function getAllAccounts() : array {
@@ -26,5 +27,19 @@ class AccountListDTO {
 			return $this->accounts[$id]->getDomain();
 		}
 		return null;
+	}
+
+	public function showPassword(int $id) : void {
+		$this->changeVisibility($id, true);
+	}
+
+	public function hidePassword(int $id) : void {
+		$this->changeVisibility($id, false);
+	}
+
+	private function changeVisibility(int $id, bool $visibility) : void {
+		if (isset($this->accounts[$id])) {
+			$this->accounts[$id]->setVisibility($visibility);
+		}
 	}
 }
