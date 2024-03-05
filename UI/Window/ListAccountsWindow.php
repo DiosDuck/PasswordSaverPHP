@@ -65,6 +65,8 @@ class ListAccountsWindow extends Window {
 			"Accounts found!",
 			"Choose one of the options down bellow:",
 			[
+				"Show password",
+				"Hide password",
 				"Update password manually for account", 
 				"Generate new password for account", 
 				"Delete account", 
@@ -77,18 +79,47 @@ class ListAccountsWindow extends Window {
 			case '0':
 				return ['exit'];
 			case '1':
-				return ['updateAccountPassword', false];
+				return ['showPassword'];
 			case '2':
-				return ['updateAccountPassword', true];
+				return ['hidePassword'];
 			case '3':
-				return ['deleteAccountChoose'];
+				return ['updateAccountPassword', false];
 			case '4':
+				return ['updateAccountPassword', true];
+			case '5':
+				return ['deleteAccountChoose'];
+			case '6':
 				return ['backToManageAccount'];
 			default:
 				return ['accountsDisplayPage'];
 		}
 	}
 	
+	public function showPassword() : array {
+		$this->printAccounts(
+			"Show password",
+			"Select the account you want to make it visible (typing something else will just return back to the list)"
+		);
+
+		$input = readline("Select: ");
+		if (ctype_digit($input)) {
+			$this->accountList->showPassword(intval($input));
+		}
+		return ['accountsDisplayPage'];
+	}
+	public function hidePassword() : array {
+		$this->printAccounts(
+			"Hide password",
+			"Select the account you want to hide (typing something else will just return back to the list)"
+		);
+
+		$input = readline("Select: ");
+		if (ctype_digit($input)) {
+			$this->accountList->hidePassword(intval($input));
+		}
+		return ['accountsDisplayPage'];
+	}
+
 	public function deleteAccountChoose() : array {
 		$this->printAccounts(
 			"Delete Account",
