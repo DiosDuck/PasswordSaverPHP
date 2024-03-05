@@ -53,7 +53,7 @@ try {
 	$accountService = new Service\TimeoutAccountService($repoAccount, $accountBuilder);
 	
 	#start app
-	$ui = new UI\UI($userService, $accountService);
+	$ui = new UI\NewUI($userService, $accountService);
 	$ui->run();
 } catch (Exception\DB\DBException $e) {
     echo chr(27) . chr(91) . 'H' . chr(27) . chr(91) . 'J';

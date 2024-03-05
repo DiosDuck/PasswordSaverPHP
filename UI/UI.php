@@ -18,6 +18,7 @@ class UI {
 	use GeneratePasswordTrait;
 	
 	public function __construct(IUserService $userService, IAccountService $accountService) {
+		trigger_error('Class UI is deprecated, NewUI will be used and updated in the future', E_USER_DEPRECATED);
 		$this->userService = $userService;
 		$this->accountService = $accountService;
 		$this->user = null;
@@ -139,7 +140,7 @@ class UI {
 			"Please enter the password down bellow:"
 		);
 		
-		$password = $this->whileNotEmptyInput("Password :");
+		$password = $this->whileNotEmptyInput("Password: ");
 		return ['confirmDeleteUser', $password];
 	}
 	

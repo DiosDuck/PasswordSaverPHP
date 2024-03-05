@@ -7,7 +7,12 @@ use Service\IService\IUserService;
 use Exception\Authentification\AuthentificationException;
 
 class LoginWindow extends Window {
+	private string $errorMsg;
     private IUserService $userService;
+
+	public function __construct(string $errorMsg = "") {
+		$this->errorMsg = $errorMsg;
+	}
     
     public function setUserService(IUserService $userService) : void {
         $this->userService = $userService;
@@ -19,6 +24,9 @@ class LoginWindow extends Window {
 
     public function run() : ?Window {
 		$this->clearConsole();
+		if ($this->errorMsg) {
+			$this->printErrorMessage($this->errorMsg);
+		}
 		$output = $this->callMethod(['welcomePage']);
 		while (true) {
 			try {

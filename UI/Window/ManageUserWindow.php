@@ -40,16 +40,9 @@ class ManageUserWindow extends Window {
                         $output = $this->callMethod($output);
                 }
             }
-            catch (AuthentificationException $e) {
-				$this->clearConsole();
-				$this->printErrorMessage($e);
-                $output = $this->callMethod(['welcomePage']);
+            catch (AuthentificationException|TimeoutException $e) {
+				$output = [Window::WINDOW_MOVE, new LoginWindow((string) $e)];
             }
-			catch (TimeoutException $e) {
-				$this->clearConsole();
-				$this->printErrorMessage($e);
-                $output = $this->callMethod(['erroTimeoutPage']);
-			}
 		}
     }
     
@@ -65,7 +58,7 @@ class ManageUserWindow extends Window {
 			case '0':
 				return ['exit'];
 			case '1':
-				return [Window::WINDOW_EXIT];
+				return ['manageAccounts'];
 			case '2':
 				return ['changePassword'];
 			case '3':
@@ -78,6 +71,10 @@ class ManageUserWindow extends Window {
 				return ['welcomePage'];
 		}	
     }
+
+	public function manageAccounts() : array {
+		return [Window::WINDOW_MOVE, new ManageAccountWindow($this->user)];
+	}
 	
 	public function changePassword() : array {
 		$this->printDisplayText(
@@ -202,11 +199,4 @@ class ManageUserWindow extends Window {
 	public function logout() : array {
 		return [Window::WINDOW_MOVE, new LoginWindow()];
 	}
-
-    public function erroTimeoutPage() : array {
-        $this->printDisplayText('', 'Press enter to enter the logging screen');
-        
-        readline();
-        return [Window::WINDOW_MOVE, new LoginWindow()];
-    }
 }
