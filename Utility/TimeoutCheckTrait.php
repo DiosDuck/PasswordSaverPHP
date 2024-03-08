@@ -5,12 +5,12 @@ namespace Utility;
 use Entity\IEntity\IUser;
 use Entity\TimeoutUser;
 use Exception\Timeout\TimeoutException;
-use Exception\Timeout\WrongUserException;
+use Exception\Type\UserTypeException;
 
 trait TimeoutCheckTrait {
 	public function checkUserValid(IUser $user) : TimeoutUser {
 		if (!$user  instanceof TimeoutUser) {
-			throw new WrongUserException();
+			throw new UserTypeException();
 		}
 		if (time() - $user->getTime() > 60 * 5) {
 			throw new TimeoutException();

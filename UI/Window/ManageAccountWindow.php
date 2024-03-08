@@ -4,6 +4,7 @@ namespace UI\Window;
 
 use Entity\IEntity\IUser;
 use Exception\Account\AccountException;
+use Exception\EmptyList\EmptyListException;
 use Service\IService\IAccountService;
 use Service\IService\IUserService;
 use Exception\Timeout\TimeoutException;
@@ -44,6 +45,11 @@ class ManageAccountWindow extends Window {
             }
 			catch (TimeoutException $e) {
 				$output = [Window::WINDOW_MOVE, new LoginWindow((string) $e)];
+			}
+			catch (EmptyListException $e) {
+				$this->clearConsole();
+				$this->printErrorMessage('There are no data found, please try again or insert new data');
+				$output = $this->callMethod(['manageAccounts']);
 			}
             catch (AccountException $e) {
 				$this->clearConsole();

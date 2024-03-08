@@ -282,26 +282,15 @@ class ListAccountsWindow extends Window {
             }
         }
 
-        $lineLength = array_sum($columnLengths) + 3 * count($columnLengths) + 1;
-        $table = str_repeat('*', $lineLength)
-            . "\n"
-            . '* ' . str_pad('Number', $columnLengths[0])
-            . ' * ' . str_pad('Domain', $columnLengths[1])
-            . ' * ' . str_pad('User/Email', $columnLengths[2])
-            . ' * ' . str_pad('Password', $columnLengths[3])
-            . " *\n"
-            . str_repeat('*', $lineLength)
-            . "\n";
+        $table = $this->getPrintAccountsSeparateLine($columnLengths) . PHP_EOL
+			. $this->getPrintAccountsValueLine(['Number', 'Domain', 'User/Email', 'Password'], $columnLengths) . PHP_EOL
+			. $this->getPrintAccountsSeparateLine($columnLengths) . PHP_EOL;
 
         foreach ($data as $counter => $row) {
-            $table .=  '* ' . str_pad($counter, $columnLengths[0])
-                . ' * ' . str_pad($row[0], $columnLengths[1])
-                . ' * ' . str_pad($row[1], $columnLengths[2])
-                . ' * ' . str_pad($row[2], $columnLengths[3])
-                . " *\n";
+            $table .=  $this->getPrintAccountsValueLine(array_merge([$counter], $row), $columnLengths) . PHP_EOL;
         }
 
-        $table .= str_repeat('*', $lineLength) . "\n";
+        $table .= $this->getPrintAccountsSeparateLine($columnLengths) . PHP_EOL;
         
         $text = "\e[1;32m$title\e[0m\n";
         if ($subtitle)
@@ -314,5 +303,25 @@ class ListAccountsWindow extends Window {
             $text .= "\n0: Exit\n";
         }
 		echo $text . PHP_EOL;
+	}
+
+	private function getPrintAccountsSeparateLine(array $lenghts) : string {
+		$line = '';
+		foreach ($lenghts as $lenght) {
+			$line .= '+' . str_repeat('-', $lenght + 2);
+		}
+		$line .= '+';
+
+		return $line;
+	}
+
+	private function getPrintAccountsValueLine(array $values, array $lenghts) : string {
+		$line = '';
+		for($i = 0; $i < count($values); $i++) {
+			$line .= '| ' . str_pad($values[$i], $lenghts[$i]) . ' ';
+		}
+		$line .= '|';
+
+		return $line;
 	}
 }

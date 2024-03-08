@@ -3,9 +3,9 @@
 namespace Service;
 
 use Entity\IEntity\IUser;
-use Entity\IEntity\IAccount;
 use Utility\AccountListDTO;
 use Repository\IRepository\IAccountRepository;
+use Exception\EmptyList\EmptyListException;
 use Service\IService\IAccountService;
 use Builder\IBuilder\IAccountBuilder;
 
@@ -33,6 +33,9 @@ class AccountService implements IAccountService {
 	}
 	public function getAccountsByDomain(IUser $user, string $domain) : AccountListDTO {
 		$acc = $this->accountRepository->getAllByDomain($user, $domain);
+		if (empty($acc)) {
+			throw new EmptyListException();
+		}
 		return new AccountListDTO($acc);
 	}
 	
