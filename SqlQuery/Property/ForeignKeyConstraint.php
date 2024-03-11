@@ -2,7 +2,9 @@
 
 namespace SqlQuery\Property;
 
-class ForeignKeyConstraint {
+use SqlQuery\Property\Constraint;
+
+class ForeignKeyConstraint extends Constraint {
     private string $column;
     private string $table;
     private string $key;

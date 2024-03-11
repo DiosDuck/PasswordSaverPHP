@@ -10,9 +10,9 @@ use Mapper\DB\AccountDBMapper;
 use SqlQuery\Condition\AndCondition;
 use SqlQuery\Condition\EqualCondition;
 use SqlQuery\Condition\LikeCondition;
-use SqlQuery\Property\Property;
-use SqlQuery\Property\PrimaryKeyProperty;
+use SqlQuery\Property\VarcharProperty;
 use SqlQuery\Property\ForeignKeyConstraint;
+use SqlQuery\Property\PrimaryKeyConstraint;
 
 class CryptedAccountDBMapper extends AccountDBMapper {
 
@@ -78,13 +78,16 @@ class CryptedAccountDBMapper extends AccountDBMapper {
         return $this->sqlQuery->getCreateQuery(
             "account",
             [
-                new PrimaryKeyProperty("domain", "VARCHAR(255)"),
-                new Property("username", "VARCHAR(255)"),
-                new Property("password", "VARCHAR(255)"),
-                new Property("key", "VARCHAR(255)"),
-                new Property("user", "VARCHAR(255)")
+                new VarcharProperty("domain"),
+                new VarcharProperty("username"),
+                new VarcharProperty("password"),
+                new VarcharProperty("key"),
+                new VarcharProperty("user")
             ],
-            new ForeignKeyConstraint("user", "user", "username")
+            [
+                new ForeignKeyConstraint("user", "user", "username"),
+                new PrimaryKeyConstraint("domain", "user")
+            ]
         );
     }
     public function getAccount(array $data, IUser $user) : IAccount {

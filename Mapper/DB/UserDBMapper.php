@@ -6,8 +6,8 @@ use Mapper\DB\IMapper\IUserDBMapper;
 use Entity\IEntity\IUser;
 use Entity\User;
 use SqlQuery\Condition\EqualCondition;
-use SqlQuery\Property\PrimaryKeyProperty;
-use SqlQuery\Property\Property;
+use SqlQuery\Property\PrimaryKeyConstraint;
+use SqlQuery\Property\VarcharProperty;
 use SqlQuery\SqlQuery;
 
 class UserDBMapper implements IUserDBMapper {
@@ -78,9 +78,12 @@ class UserDBMapper implements IUserDBMapper {
         return $this->sqlQuery->getCreateQuery(
             "user",
             [
-                new PrimaryKeyProperty("username", "VARCHAR(255)"),
-                new Property("name", "VARCHAR(255)"),
-                new Property("password", "VARCHAR(255)")
+                new VarcharProperty("username"),
+                new VarcharProperty("name"),
+                new VarcharProperty("password")
+            ],
+            [
+                new PrimaryKeyConstraint("username")
             ]
         );
     }

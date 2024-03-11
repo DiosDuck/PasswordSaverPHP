@@ -7,8 +7,8 @@ use Entity\CryptedUser;
 use Exception\Type\UserTypeException;
 use Mapper\DB\UserDBMapper;
 use SqlQuery\Condition\EqualCondition;
-use SqlQuery\Property\Property;
-use SqlQuery\Property\PrimaryKeyProperty;
+use SqlQuery\Property\PrimaryKeyConstraint;
+use SqlQuery\Property\VarcharProperty;
 
 class CryptedUserDBMapper extends UserDBMapper {
     public function getInsertQuery() : string {
@@ -65,10 +65,13 @@ class CryptedUserDBMapper extends UserDBMapper {
         return $this->sqlQuery->getCreateQuery(
             "user",
             [
-                new PrimaryKeyProperty("username", "VARCHAR(255)"),
-                new Property("name", "VARCHAR(255)"),
-                new Property("password", "VARCHAR(255)"),
-                new Property("key", "VARCHAR(255)")
+                new VarcharProperty("username"),
+                new VarcharProperty("name"),
+                new VarcharProperty("password"),
+                new VarcharProperty("key")
+            ],
+            [
+                new PrimaryKeyConstraint("username")
             ]
         );
     }

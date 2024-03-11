@@ -49,4 +49,11 @@ class AccountService implements IAccountService {
 		
 		$this->accountRepository->update($account, $account);
 	}
+
+	public function updateAccountUsername(IUser $user, string $domain, string $newUsername) : void {
+		$account = $this->accountRepository->get($user, $domain);
+		$account->setUsername($newUsername);
+		
+		$this->accountRepository->update($account, $account);
+	}
 }

@@ -11,4 +11,5 @@ interface IAccountService {
 	public function getAccountsByDomain(IUser $user, string $domain) : AccountListDTO;
 	public function deleteUser(IUser $user) : void;
 	public function updateAccountPassword(IUser $user, string $domain, string $newPassword) : void;
+	public function updateAccountUsername(IUser $user, string $domain, string $newUsername) : void;
 }

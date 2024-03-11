@@ -20,31 +20,36 @@ class TimeoutAccountService extends AccountService {
 	
 	public function addAccount(IUser $user, string $domain, string $username, string $password) : void {
 		$this->checkUserValid($user);
-		parent::addAccount($user, $domain, $username, $password);
 		$this->updateUser($user);
+		parent::addAccount($user, $domain, $username, $password);
 	}
 	public function deleteAccount(IUser $user, string $domain) : void {
 		$this->checkUserValid($user);
-		parent::deleteAccount($user, $domain);
 		$this->updateUser($user);
+		parent::deleteAccount($user, $domain);
 	}
 	public function getAccountsByDomain(IUser $user, string $domain) : AccountListDTO {
 		$this->checkUserValid($user);
-		$accounts = parent::getAccountsByDomain($user, $domain);
 		$this->updateUser($user);
-		return $accounts;
+		return parent::getAccountsByDomain($user, $domain);
 	}
 	
 	public function updateAccountPassword(IUser $user, string $domain, string $newPassword) : void {
 		$this->checkUserValid($user);
-		parent::updateAccountPassword($user, $domain, $newPassword);
 		$this->updateUser($user);
+		parent::updateAccountPassword($user, $domain, $newPassword);
 	}
 	
 	public function deleteUser(IUser $user) : void {
 		$this->checkUserValid($user);
-		parent::deleteUser($user);
 		$this->updateUser($user);
+		parent::deleteUser($user);
 	}
+
 	
+	public function updateAccountUsername(IUser $user, string $domain, string $newUsername) : void {
+		$this->checkUserValid($user);
+		$this->updateUser($user);
+		parent::updateAccountUsername($user, $domain, $newUsername);
+	}
 }

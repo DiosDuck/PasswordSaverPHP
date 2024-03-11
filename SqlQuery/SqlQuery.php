@@ -3,7 +3,6 @@
 namespace SqlQuery;
 
 use SqlQuery\Condition\ICondition\ICondition;
-use SqlQuery\Property\ForeignKeyConstraint;
 
 class SqlQuery {
     public function getInsertQuery(string $table, array $columns) : string {
@@ -35,12 +34,12 @@ class SqlQuery {
         );
     }
 
-    public function getCreateQuery(string $table, array $properties, ?ForeignKeyConstraint $foreignKeyConstraint = null) : string {
+    public function getCreateQuery(string $table, array $properties, array $constraints) : string {
         $output = $this->create($table) . '(';
-        $output .= implode(', ', array_map(function($property) {return $property->getProperty();}, $properties));
-        if ($foreignKeyConstraint) {
-            $output .= ', ' . $foreignKeyConstraint->getConstraint();
-        }
+        $output .= implode(",\n", array_merge(
+            array_map(fn($property) => $property->getProperty(), $properties),
+            array_map(fn($constraint) => $constraint->getConstraint(), $constraints)
+        ));
         $output .= ')';
         return $output;
     }
